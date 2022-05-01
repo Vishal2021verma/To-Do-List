@@ -1,26 +1,49 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const { Template } = require('ejs');
 
 const app = express();
-var items = [];
-let workItems = [];
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static("public"));
 
-app.get("/", (req,res) => {
-    var today = new Date();
+// Database code
+mongoose.connect('mongodb://localhost:27017/todolistDB', {useNewUrlParser: true});
 
-    var option  = {
-        weekday: "long",
-        day: "numeric",
-        month: "long"
+const itmesSchema ={
+    name: String
+}
+const Item = mongoose.model("Item", itmesSchema);
+
+const item1 = new Item({
+    name: 'Welcome to your todolist!'
+});
+const item2 = new Item({
+    name:'Hit the + button to aff a new item.'
+});
+const item3 = new Item({
+    name: '<-- Hit this to delete an item.'
+});
+
+const defaultItems = [item1, item2, item3];
+
+Item.insertMany(defaultItems, function(err){
+    if(err) console.log(err);
+    else{
+        console.log('Successfully Saved')
+
     }
-    var day = today.toLocaleDateString("en-US",option);
+});
 
+// Routing code
+app.get("/", (req,res) => {
+    
+    Item.find({},function(err,foundItems){
+        res.render("List",{listTitle: "Today", newItems: foundItems});
+    });
     // EJS Template use 
-    res.render("List",{listTitle: "General", newItems: items});
+  
 });
 
 app.post("/",(req,res)=> {
