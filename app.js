@@ -25,8 +25,13 @@ app.get("/", (req,res) => {
 
 app.post("/",(req,res)=> {
     var item = req.body.newItem;
-    items.push(item);
-    res.redirect("/");
+    if(req.body.list === 'Work'){
+        workItems.push(item);
+        res.redirect("/work");
+    }else{
+        items.push(item);
+        res.redirect("/");
+    }
 });
 app.get("/work",(req,res)=>{
     res.render("list", {listTitle:"Work List", newItems: workItems})
